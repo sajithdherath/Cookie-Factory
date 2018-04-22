@@ -12,54 +12,68 @@ import java.util.regex.Pattern;
 /**
  * Created by sajith on 4/7/18
  */
-public class InventoryManager {
+public class InventoryManager extends Thread{
     private Warehouse warehouse;
-    private List<Cookie> recipeLines;
+    private List<Material> materialSupplyList;
 
     private InventoryManager() {
     warehouse = new Warehouse();
-    recipeLines = new ArrayList<Cookie>();
+    materialSupplyList = new ArrayList<Material>();
     }
 
     private static InventoryManager instance = new InventoryManager();
 
     public static InventoryManager getInstance() {
         return instance;
-    }
+    }/**/
 
     public Material getMaterial(String readData){
         String[] splitData = readData.split(" ");
         Material material = new Material(splitData[0],Integer.parseInt(splitData[1]));
+        //warehouse.getMaterials().add(material);
         return material;
     }
 
-    public Cookie getRecipeLine(String readData){
-        String pattern = "(?<=\\[).*?(?=\\|)";
-        Pattern r = Pattern.compile(pattern);
-        Matcher matcher = r.matcher(readData);
-        Cookie cookie = new Cookie();
-        cookie.setCode(readData.substring(0,2));
-        if(matcher.find()){
-            String found = matcher.group();
-            String splitData[] = found.split(" ");
-            for(String s:splitData){
-                cookie.getMaterials().add(getMaterial(s.replace(":"," ")));
-            }
-        }
-        pattern = "(?<=\\|\\s).*?(?=\\])";
-        r = Pattern.compile(pattern);
-        matcher = r.matcher(readData);
-        if(matcher.find()){
-            cookie.setProcessTime(Integer.parseInt(matcher.group()));
-        }
-        return cookie;
-    }
 
-    public List<Cookie> getRecipeLines() {
-        return recipeLines;
-    }
+
+
 
     public Warehouse getWarehouse() {
         return warehouse;
+    }
+
+    public void addRawMaterial(String readData){
+        String[] splitData = readData.split(" ");
+        Material material = new Material(splitData[0],Integer.parseInt(splitData[1]),Integer.parseInt(splitData[2]));
+        materialSupplyList.add(material);
+    }
+
+    public void addCookies(String readData){
+        String[] splitData = readData.split(" ");
+        Cookie cookie = new Cookie();
+        cookie.setCode(splitData[0]);
+        cookie.setName(cookie.getCode());
+        cookie.setQuantity(Integer.parseInt(splitData[1]));
+        warehouse.getCookies().add(cookie);
+    }
+
+    @Override
+    public void run() {
+        outerloop:
+        for(int j=0;j<materialSupplyList.size();j++){
+            Material material = materialSupplyList.get(j);
+            if(Thread.currentThread().getName().equals(material.getCode())){
+                for (int i=0;i<warehouse.getMaterials().size();i++){
+                    Material materialWaerhoue= warehouse.getMaterials().get(i);
+                    if(material.getCode().equals(materialWaerhoue.getCode())){
+                        materialWaerhoue.setQuantity(materialWaerhoue.getQuantity()+material.getQuantity());
+                        warehouse.getMaterials().set(i,materialWaerhoue);
+                        System.out.println("RM Arrival "+material.getName()+" "+material.getArrivalTime()+" "+material.getQuantity()+"kg ["+materialWaerhoue.getCode()+" "+materialWaerhoue.getQuantity()+"]");
+                        break outerloop;
+                    }
+                }
+            }
+
+        }
     }
 }

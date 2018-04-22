@@ -1,5 +1,12 @@
 package org.sachu.models;
 
+import org.sachu.FactoryManager;
+import org.sachu.InventoryManager;
+
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Created by sajith on 4/7/18
  */
@@ -8,11 +15,35 @@ public class Material {
     private String code;
     private String name;
     private int quantity;
+    private int arrivalTime;
+    private InventoryManager inventoryManager;
+
+    Timer timer = new Timer();
+    TimerTask addMaterial = new TimerTask() {
+        public void run() {
+            inventoryManager = InventoryManager.getInstance();
+            Thread thread = new Thread(inventoryManager,code);
+            thread.start();
+        }
+    };
+
 
     public Material(String code, int quantity) {
         this.code = code;
         this.quantity = quantity;
         setName(code);
+
+
+    }
+
+    public Material(String code,  int quantity, int arrivalTime) {
+        this.code = code;
+        setName(code);
+        this.quantity = quantity;
+        this.arrivalTime = arrivalTime;
+        if(arrivalTime>0){
+            timer.schedule(addMaterial, new Date(System.currentTimeMillis()+arrivalTime*1000));
+        }
     }
 
     public String getCode() {
@@ -51,5 +82,11 @@ public class Material {
         this.quantity = quantity;
     }
 
+    public int getArrivalTime() {
+        return arrivalTime;
+    }
 
+    public void setArrivalTime(int arrivalTime) {
+        this.arrivalTime = arrivalTime;
+    }
 }

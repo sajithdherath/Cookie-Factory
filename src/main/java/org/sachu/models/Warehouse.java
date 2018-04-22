@@ -9,9 +9,11 @@ import java.util.List;
 public class Warehouse {
     private int storageCapacity;
     private List<Material> materials;
+    private List<Cookie> cookies;
 
     public Warehouse() {
         materials = new ArrayList<Material>();
+        cookies = new ArrayList<Cookie>();
     }
 
     public int getStorageCapacity() {
@@ -28,5 +30,13 @@ public class Warehouse {
 
     public void setMaterials(List<Material> materials) {
         this.materials = materials;
+    }
+
+    public List<Cookie> getCookies() {
+        return cookies;
+    }
+
+    public void setCookies(List<Cookie> cookies) {
+        this.cookies = cookies;
     }
 }

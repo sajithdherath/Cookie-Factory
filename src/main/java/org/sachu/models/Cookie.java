@@ -12,6 +12,7 @@ public class Cookie {
     private String name;
     private List<Material> materials= new ArrayList<Material>();
     private int processTime;
+    private int quantity;
 
     public String getCode() {
         return code;
@@ -53,5 +54,11 @@ public class Cookie {
         this.processTime = processTime;
     }
 
+    public int getQuantity() {
+        return quantity;
+    }
 
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 }

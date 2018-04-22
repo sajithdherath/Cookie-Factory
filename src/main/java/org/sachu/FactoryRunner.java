@@ -1,11 +1,14 @@
 package org.sachu;
 
+import org.sachu.models.Cookie;
+import org.sachu.models.Material;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,13 +21,48 @@ public class FactoryRunner {
     private static InventoryManager inventoryManager;
 
     public static void main(String[] args) {
-
         factoryManager = FactoryManager.getInstance();
         inventoryManager = InventoryManager.getInstance();
+
+        Timer timer = new Timer();
+        TimerTask exitApp = new TimerTask() {
+            public void run() {
+                String manufactured="";
+                for(Cookie cookie:factoryManager.getManufacturedCookies()){
+                    manufactured+=cookie.getCode()+" "+cookie.getQuantity()+" ";
+                }
+
+                System.out.println("\nTotal Manufactured ["+factoryManager.getTotalManufactured()+"] "+manufactured);
+                System.out.println("Total Dispatched "+FactoryManager.totalDispatched);
+                System.out.println("Effective throughput "+factoryManager.getEffectiveThroughput());
+                System.exit(0);
+            }
+        };
 
         for (String s : args) {
             readFiles(s);
         }
+        timer.schedule(exitApp, new Date(System.currentTimeMillis()+factoryManager.getRunTime()*1000));
+
+        SimpleDateFormat date = new SimpleDateFormat("dd.MM.yyyy  hh:mm:ss");
+        System.out.println("\n\n");
+        System.out.println("+-----------------------------------------------------------------------+");
+        System.out.println("|               "+factoryManager.getFactory().getName().toUpperCase()+" OPERATION REPORT \t\t|");
+        System.out.println("+-----------------------------------------------------------------------+");
+        System.out.println("|\t\t\t\t\t\t\t\t\t|");
+        System.out.println("|    Start time \t\t             : "+date.format(new Date( ))+"\t|");
+        System.out.println("|    Production Line \t \t\t     : "+FactoryManager.productionLine+"\t\t\t|");
+        System.out.println("|    Run Time\t\t                     : "+factoryManager.getRunTime()+"s\t\t\t|");
+        System.out.println("|    Warehouse Storage Capacity              : "+inventoryManager.getWarehouse().getStorageCapacity()+" Containers\t\t|");
+        System.out.println("|    Factory Storage Capacity                : "+factoryManager.getFactory().getStorageCapacity()+" Containers\t\t|");
+        System.out.println("|\t\t\t\t\t\t\t\t\t|");
+        System.out.println("-------------------------------------------------------------------------");
+        System.out.println("\n\n");
+
+        for (Material material:inventoryManager.getWarehouse().getMaterials()){
+            System.out.println(material.getName()+" - "+material.getCode());
+        }
+        System.out.println();
     }
 
     public static void readFiles(String fileName) {
@@ -37,7 +75,7 @@ public class FactoryRunner {
         String baseDir = System.getProperty("user.dir");
         String path = baseDir + "/" + fileName;
         try {
-            FileReader fileReader = new FileReader(path);
+            FileReader fileReader = new FileReader(fileName);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             String data;
             while ((data = bufferedReader.readLine()) != null) {
@@ -49,32 +87,40 @@ public class FactoryRunner {
                         if (section.equals(separators.get(0))) {
                             String[] splittedData = data.split(":");
                             if (splittedData[0].equals("Name")) {
-                                factoryManager.setName(data.split(": ")[1]);
-                            } else if (splittedData[0].equals("Production Line")) {
-                                factoryManager.setProductionLine(data.split(": ")[1]);
+                                factoryManager.getFactory().setName(data.split(": ")[1]);
+
+                            } else if (splittedData[0].equals("Production line")) {
+                                FactoryManager.productionLine=Integer.parseInt(data.split(": ")[1]);
+
+
                             } else if (splittedData[0].equals("Warehouse storage capacity")) {
                                 inventoryManager.getWarehouse().setStorageCapacity(Integer.parseInt(data.split(": ")[1]));
 
                             } else if (splittedData[0].equals("Factory storage capacity")) {
-                                System.out.println(splittedData[1]);
+                                factoryManager.getFactory().setStorageCapacity(Integer.parseInt(splittedData[1].trim()));
+
                             } else if (splittedData[0].equals("Run time")) {
                                 Pattern pattern = Pattern.compile("\\d+");
                                 Matcher matcher = pattern.matcher(splittedData[1]);
                                 while (matcher.find()) {
                                     factoryManager.setRunTime(Integer.parseInt(matcher.group()));
+
                                 }
                             }
                         } else if (section.equals(separators.get(1))) {
-                            inventoryManager.getRecipeLines().add(inventoryManager.getRecipeLine(data));
+                            factoryManager.addRecipeLine(data);
                         } else if (section.equals(separators.get(2))) {
-                            inventoryManager.getWarehouse().getMaterials().add(inventoryManager.getMaterial(data));
-                        } else if (section.equals(separators.get(3))) {
+                            Material material = inventoryManager.getMaterial(data);
+                            inventoryManager.getWarehouse().getMaterials().add(material);
 
+                        } else if (section.equals(separators.get(3))) {
+                            inventoryManager.addCookies(data);
                         }
                     }
                 } else if (fileName.equals("invoice.dat")) {
-                    //System.out.println(data);
+                    factoryManager.addInvoice(data);
                 } else if (fileName.equals("rmarrival.dat")) {
+                    inventoryManager.addRawMaterial(data);
 
                 }
             }
@@ -88,4 +134,7 @@ public class FactoryRunner {
         }
     }
 
+
+
 }
+

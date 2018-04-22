@@ -1,9 +1,9 @@
 #base data
 Name: Java Cookie Factory
-Production line: 2
+Production line: 3
 Warehouse storage capacity: 3400
 Factory storage capacity: 280
-Run time:120ms
+Run time:60ms
 #recipe line
 BB [FL:60 BT:10 SG:20 MK:10 | 12]
 BC [FL:50 BT:20 SG:20 MK:10 | 15]
