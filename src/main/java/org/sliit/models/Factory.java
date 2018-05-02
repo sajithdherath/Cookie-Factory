@@ -1,4 +1,4 @@
-package org.sachu.models;
+package org.sliit.models;
 
 /**
  * Created by sajith on 4/7/18

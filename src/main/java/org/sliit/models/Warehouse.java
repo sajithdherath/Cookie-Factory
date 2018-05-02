@@ -1,4 +1,4 @@
-package org.sachu.models;
+package org.sliit.models;
 
 import java.util.ArrayList;
 import java.util.List;

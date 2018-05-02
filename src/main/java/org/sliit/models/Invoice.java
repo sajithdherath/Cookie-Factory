@@ -1,6 +1,6 @@
-package org.sachu.models;
+package org.sliit.models;
 
-import org.sachu.FactoryManager;
+import org.sliit.FactoryManager;
 
 import java.util.*;
 

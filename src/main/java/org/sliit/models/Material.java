@@ -1,7 +1,6 @@
-package org.sachu.models;
+package org.sliit.models;
 
-import org.sachu.FactoryManager;
-import org.sachu.InventoryManager;
+import org.sliit.InventoryManager;
 
 import java.util.Date;
 import java.util.Timer;

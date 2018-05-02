@@ -1,7 +1,7 @@
-package org.sachu;
+package org.sliit;
 
-import org.sachu.models.Cookie;
-import org.sachu.models.Material;
+import org.sliit.models.Cookie;
+import org.sliit.models.Material;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
